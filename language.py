@@ -22,8 +22,8 @@ class Language():
         
         # self._p_irr = "maybe" if irrealis != 0 else "" # yeah.. I'm gonna get rid of this one. 
         self._m_irr = "%" if irrealis == 1 else ""
-        self._int_disj = "" if int_disj == 0 else " & " if int_disj == 1 else " * " if int_disj == 2 else " ^ "
-        self._std_disj = "" if std_disj == 0 else " & " if std_disj == 1 else " * " if std_disj == 2 else " ^ "
+        self._int_disj = "" if int_disj == 0 else "&" if int_disj == 1 else "*" if int_disj == 2 else "^"
+        self._std_disj = "" if std_disj == 0 else "&" if std_disj == 1 else "*" if std_disj == 2 else "^"
         self._int_marker = "" if int_markers == 0 else "?" if int_markers == 1 else self._m_irr
         self._std_marker = "" if std_markers == 0 else "?" if std_markers == 1 else self._m_irr
         self._props = props
@@ -47,41 +47,42 @@ class Language():
             n_p2 = n_both + sum(model[:,3])
             n_none = 1 - n_both
 
-
+            EOS = ["<eos>"]
+            SOS = ["<sos>"]
 
             # Still missing case where only one is possible...
             if n_both > 0.8 * len(model):
-                return p1 + " & " + p2 if not info_request else ""
+                return SOS + [p1, "&", p2] + EOS if not info_request else SOS + EOS
             elif n_p1 > 0.8 * len(model):
                 if n_p2 > 0.2 * len(model):
                     if info_request:
-                        return p2 + "?"
+                        return SOS + [p2, "?"] + EOS
                     else:
-                        return p1 + " & " + p2 + self._m_irr 
+                        return SOS + [p1, "&", p2, self._m_irr] + EOS
                 else:
-                    return p1 if not info_request else p2 + "?"
+                    return SOS + [p1] + EOS if not info_request else SOS + [p2, "?"] + EOS
             elif n_p2 > 0.8 * len(model):
                 if n_p1 > 0.2 * len(model):
                     if info_request:
-                        return p1 + "?"
+                        return SOS + [p1, "?"] + EOS
                     else:
-                        return p2 + " & " + p1 + self._m_irr 
+                        return SOS + [p2, "&", p1, self._m_irr] + EOS
                 else:
-                    return p2 if not (info_request) else p1 + "?"
+                    return SOS + [p2] + EOS if not (info_request) else SOS + [p1, "?"] + EOS
             else:
                 if info_request:
-                    return p1 + self._int_marker + self._int_disj + p2 + self._int_marker
+                    return SOS + [p1, self._int_marker, self._int_disj, p2, self._int_marker] + EOS
                 else:
                     if n_none >= 0.8 * len(model):
-                        return ""
+                        return SOS + EOS
                     elif n_both > 0.2 * len(model):
-                        return p1 + self._std_marker + self._std_disj + p2 + self._std_marker
+                        return SOS + [p1, self._std_marker, self._std_disj, p2, self._std_marker] + EOS
                     elif n_p1 > 0.2 * len(model):
-                        return p1 + self._m_irr
+                        return SOS + [p1, self._m_irr] + EOS
                     elif n_p2 > 0.2 * len(model):
-                        return p2 + self._m_irr
+                        return SOS + [p2, self._m_irr] + EOS
                     else:
-                        return ""            
+                        return SOS + EOS         
         
 
     
